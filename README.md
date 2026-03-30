@@ -1,0 +1,2 @@
+# Practice6-AutoUnitTests-Solodovnikov_Kuraev-Part3
+Автоматизированное тестирование авторизации и регистрации
