@@ -1,22 +1,31 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
+using System.Collections.Generic;
+using Практическая_работа_4_Солодовников_Кураев.Database;
 
 namespace Практическая_работа_4_Солодовников_Кураев.Pages
 {
     public partial class RegPage : Page
     {
-        private Dictionary<string, string> _users;
-        public RegPage(Dictionary<string, string> users = null)
+        private Dictionary<string, string> _testUsers;
+        private DatabaseHelper _dbHelper;
+
+        public RegPage()
         {
             InitializeComponent();
-            _users = users ?? new Dictionary<string, string>();
+            _dbHelper = new DatabaseHelper();
+        }
+
+        public RegPage(Dictionary<string, string> testUsers)
+        {
+            InitializeComponent();
+            _testUsers = testUsers;
         }
 
         /// <summary>
-        /// Метод регистрации для тестирования
+        /// Метод регистрации
         /// </summary>
         public bool Register(string login, string password, string confirmPassword)
         {
@@ -32,12 +41,28 @@ namespace Практическая_работа_4_Солодовников_Ку�
             if (password != confirmPassword)
                 throw new ArgumentException("Пароли не совпадают!");
 
-            if (_users.ContainsKey(login))
-                throw new ArgumentException("Пользователь с таким логином уже существует!");
-
             if (!Regex.IsMatch(login, @"^[a-zA-Z0-9_]+$"))
                 throw new ArgumentException("Логин может содержать только буквы, цифры и знак подчеркивания!");
-            _users.Add(login, password);
+
+            if (_testUsers != null)
+            {
+                if (_testUsers.ContainsKey(login))
+                    throw new ArgumentException("Пользователь с таким логином уже существует!");
+
+                _testUsers.Add(login, password);
+                return true;
+            }
+
+            if (_dbHelper == null)
+                throw new Exception("Ошибка инициализации подключения к базе данных");
+
+            if (_dbHelper.UserExists(login))
+                throw new ArgumentException("Пользователь с таким логином уже существует!");
+
+            bool result = _dbHelper.AddUser(login, password, "", login);
+            if (!result)
+                throw new Exception("Ошибка при сохранении пользователя в базу данных");
+
             return true;
         }
 
@@ -52,7 +77,8 @@ namespace Практическая_работа_4_Солодовников_Ку�
                 if (Register(login, password, confirmPassword))
                 {
                     StatusText.Text = "Регистрация успешно завершена!";
-                    StatusText.Foreground = System.Windows.Media.Brushes.Green;
+                    StatusText.Foreground = System.Windows.Media.Brushes.Green; 
+                    NavigationService?.Navigate(new AuthPage());
                 }
             }
             catch (Exception ex)

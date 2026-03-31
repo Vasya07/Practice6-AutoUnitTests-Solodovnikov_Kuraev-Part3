@@ -75,12 +75,12 @@
                         Content="Какая-то кнопка" 
                         Width="113" Height="40" 
                         Margin="5"
-                        Background="#E74C3C"
+                        Background="Green"
                         Foreground="White"
                         BorderThickness="0"
                         FontWeight="Bold"
                         Click="EasterEggButton_Click"
-                        ToolTip="Это какая-то странная кнопка, которая делает что-то странное"/>
+                        ToolTip="Эта волшебная кнопка. Нажми и узнаешь, что она делает"/>
             </StackPanel>
         </Border>
     </Grid>

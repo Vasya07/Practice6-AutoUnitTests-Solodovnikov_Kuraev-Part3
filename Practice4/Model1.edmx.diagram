@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="f12812ca4c7e4ea2926d13ad28f3334b" Name="Diagram1">
+        <EntityTypeShape EntityType="Practice6Part3Model.AuditLog" Width="1.5" PointX="7.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Practice6Part3Model.Categories" Width="1.5" PointX="0.75" PointY="3" IsExpanded="true" />
+        <EntityTypeShape EntityType="Practice6Part3Model.Customers" Width="1.5" PointX="0.75" PointY="7.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="Practice6Part3Model.OrderDetails" Width="1.5" PointX="5.25" PointY="2.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="Practice6Part3Model.Orders" Width="1.5" PointX="3" PointY="7.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Practice6Part3Model.PriceHistory" Width="1.5" PointX="5.25" PointY="6.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="Practice6Part3Model.Products" Width="1.5" PointX="3" PointY="2.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="Practice6Part3Model.Users" Width="1.5" PointX="7.75" PointY="4.75" IsExpanded="true" />
+        <AssociationConnector Association="Practice6Part3Model.FK__Products__Catego__38996AB5" ManuallyRouted="false" />
+        <AssociationConnector Association="Practice6Part3Model.FK__Orders__Customer__412EB0B6" ManuallyRouted="false" />
+        <AssociationConnector Association="Practice6Part3Model.FK__OrderDeta__Order__46E78A0C" ManuallyRouted="false" />
+        <AssociationConnector Association="Practice6Part3Model.FK__OrderDeta__Produ__47DBAE45" ManuallyRouted="false" />
+        <AssociationConnector Association="Practice6Part3Model.FK__PriceHist__Produ__4F7CD00D" ManuallyRouted="false" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

@@ -60,6 +60,17 @@ namespace Практическая_работа_4_Солодовников_Ку�
         {
             MainFrame.Navigate(new Page3());
         }
+
+        private void ButtonAuthPage_Click(object sender, RoutedEventArgs e)
+        {
+            MainFrame.Navigate(new AuthPage());
+        }
+
+        private void ButtonRegPage_Click(object sender, RoutedEventArgs e)
+        {
+            MainFrame.Navigate(new RegPage());
+        }
+
         private void EasterEggButton_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -82,21 +93,6 @@ namespace Практическая_работа_4_Солодовников_Ку�
                 MessageBox.Show($"Ошибка воспроизведения: {ex.Message}",
                     "Упс", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-        }
-        private void ButtonAuthPage_Click(object sender, RoutedEventArgs e)
-        {
-            MainFrame.Navigate(new AuthPage());
-        }
-        private Dictionary<string, string> GetUsersFromAuthPage()
-        {
-            var tempAuth = new AuthPage();
-            return tempAuth.GetUsers();
-        }
-
-        private void ButtonRegPage_Click(object sender, RoutedEventArgs e)
-        {
-            var users = GetUsersFromAuthPage();
-            MainFrame.Navigate(new RegPage(users));
         }
 
         protected override void OnClosing(CancelEventArgs e)

@@ -1,24 +1,19 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using System.Collections.Generic;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Input;
-using System.Text;
+using Практическая_работа_4_Солодовников_Кураев.Database;
 
 namespace Практическая_работа_4_Солодовников_Кураев.Pages
 {
     public partial class AuthPage : Page
     {
-        private Dictionary<string, string> _users = new Dictionary<string, string>
-        {
-            { "admin", "123456" },
-            { "user1", "pass1" },
-            { "ivanov", "qwerty" },
-            { "petrov", "12345" }
-        };
-
+        private Dictionary<string, string> _testUsers;
+        private DatabaseHelper _dbHelper;
         private int _failedAttempts = 0;
         private string _currentCaptchaCode = "";
         private bool _captchaRequired = false;
@@ -26,10 +21,17 @@ namespace Практическая_работа_4_Солодовников_Ку�
         public AuthPage()
         {
             InitializeComponent();
+            _dbHelper = new DatabaseHelper();
+        }
+
+        public AuthPage(Dictionary<string, string> testUsers)
+        {
+            InitializeComponent();
+            _testUsers = testUsers;
         }
 
         /// <summary>
-        /// Метод авторизации для тестирования
+        /// Метод авторизации
         /// </summary>
         public bool Auth(string login, string password, string captchaCode = null)
         {
@@ -48,10 +50,14 @@ namespace Практическая_работа_4_Солодовников_Ку�
                     throw new ArgumentException("Неверный код CAPTCHA");
             }
 
-            if (!_users.ContainsKey(login))
-                return false;
+            if (_testUsers != null)
+            {
+                if (!_testUsers.ContainsKey(login))
+                    return false;
+                return _testUsers[login] == password;
+            }
 
-            return _users[login] == password;
+            return _dbHelper.ValidateUser(login, password);
         }
 
         /// <summary>
@@ -103,7 +109,7 @@ namespace Практическая_работа_4_Солодовников_Ку�
         }
 
         /// <summary>
-        /// Генерация случайного кода CAPTCHA (4-6 цифр/букв)
+        /// Генерация случайного кода CAPTCHA
         /// </summary>
         private string GenerateCaptchaCode()
         {
@@ -114,7 +120,6 @@ namespace Практическая_работа_4_Солодовников_Ку�
             {
                 code.Append(chars[random.Next(chars.Length)]);
             }
-
             return code.ToString();
         }
 
@@ -171,16 +176,6 @@ namespace Практическая_работа_4_Солодовников_Ку�
                         random.Next(5, 15), random.Next(5, 15));
                 }
 
-                FormattedText formattedText = new FormattedText(
-                    code,
-                    System.Globalization.CultureInfo.CurrentCulture,
-                    FlowDirection.LeftToRight,
-                    new Typeface("Arial Black"),
-                    random.Next(20, 26),
-                    Brushes.DarkBlue,
-                    VisualTreeHelper.GetDpi(this).PixelsPerDip);
-                double xOffset = random.Next(10, 40);
-                double yOffset = random.Next(10, 35);
                 for (int i = 0; i < code.Length; i++)
                 {
                     FormattedText letterText = new FormattedText(
@@ -247,6 +242,11 @@ namespace Практическая_работа_4_Солодовников_Ку�
                 {
                     StatusText.Text = "Вход выполнен успешно!";
                     StatusText.Foreground = System.Windows.Media.Brushes.Green;
+                    var mainWindow = Application.Current.MainWindow as MainWindow;
+                    if (mainWindow != null)
+                    {
+                        mainWindow.MainFrame.Navigate(new Page1());
+                    }
                     if (_captchaRequired)
                     {
                         _captchaRequired = false;
@@ -299,8 +299,9 @@ namespace Практическая_работа_4_Солодовников_Ку�
 
         public Dictionary<string, string> GetUsers()
         {
-            return _users;
+            return _testUsers;
         }
+
         public string GetCurrentCaptchaCode()
         {
             return _currentCaptchaCode;
@@ -308,9 +309,12 @@ namespace Практическая_работа_4_Солодовников_Ку�
 
         public void RefreshCaptcha()
         {
-            string newCode = GenerateCaptchaCode();
-            DrawCaptcha(newCode);
-            CaptchaInput.Clear();
+            if (_captchaRequired)
+            {
+                string newCode = GenerateCaptchaCode();
+                DrawCaptcha(newCode);
+                CaptchaInput.Clear();
+            }
         }
     }
 }

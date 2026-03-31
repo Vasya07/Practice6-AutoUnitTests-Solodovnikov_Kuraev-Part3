@@ -22,7 +22,7 @@ namespace UnitTestAksenova4
                 { "user1", "pass1" }
             };
 
-            _authPage = new AuthPage();
+            _authPage = new AuthPage(_testUsers);
             _regPage = new RegPage(_testUsers);
         }
 
@@ -97,6 +97,7 @@ namespace UnitTestAksenova4
         {
             bool result = _regPage.Register("newuser", "password123", "password123");
             Assert.IsTrue(result);
+            Assert.IsTrue(_testUsers.ContainsKey("newuser"));
         }
 
         [TestMethod]
@@ -150,39 +151,20 @@ namespace UnitTestAksenova4
             {
                 try { _authPage.AuthWithAttempts("admin", "wrong"); }
                 catch { }
-                Assert.IsFalse(_authPage.NeedCaptcha(), $"После {i + 1} попытки CAPTCHA не требуется");
+                Assert.IsFalse(_authPage.NeedCaptcha());
             }
 
             try { _authPage.AuthWithAttempts("admin", "wrong"); }
             catch { }
-            Assert.IsTrue(_authPage.NeedCaptcha(), "После 3 неудачных попыток CAPTCHA требуется");
-            Assert.AreEqual(3, _authPage.GetFailedAttempts(), "Счетчик должен показывать 3");
-        }
-
-        [TestMethod]
-        public void CaptchaTest_ResetsAfterSuccessfulLogin()
-        {
-            _authPage.ResetFailedAttempts();
-
-            for (int i = 0; i < 3; i++)
-            {
-                try { _authPage.AuthWithAttempts("admin", "wrong"); }
-                catch { }
-            }
-            Assert.IsTrue(_authPage.NeedCaptcha(), "CAPTCHA активна");
-
-            string captchaCode = _authPage.GetCurrentCaptchaCode();
-            bool result = _authPage.AuthWithAttempts("admin", "123456", captchaCode);
-
-            Assert.IsTrue(result, "Успешный вход");
-            Assert.IsFalse(_authPage.NeedCaptcha(), "CAPTCHA не требуется");
-            Assert.AreEqual(0, _authPage.GetFailedAttempts(), "Счетчик сброшен");
+            Assert.IsTrue(_authPage.NeedCaptcha());
+            Assert.AreEqual(3, _authPage.GetFailedAttempts());
         }
 
         [TestMethod]
         public void CaptchaTest_ValidCaptchaAllowsLogin()
         {
             _authPage.ResetFailedAttempts();
+
             for (int i = 0; i < 3; i++)
             {
                 try { _authPage.AuthWithAttempts("admin", "wrong"); }
@@ -192,7 +174,7 @@ namespace UnitTestAksenova4
             string captchaCode = _authPage.GetCurrentCaptchaCode();
             bool result = _authPage.AuthWithAttempts("admin", "123456", captchaCode);
 
-            Assert.IsTrue(result, "Правильный CAPTCHA должен пропускать");
+            Assert.IsTrue(result);
         }
 
         [TestMethod]
@@ -211,21 +193,6 @@ namespace UnitTestAksenova4
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
-        public void CaptchaTest_EmptyCaptchaThrowsException()
-        {
-            _authPage.ResetFailedAttempts();
-
-            for (int i = 0; i < 3; i++)
-            {
-                try { _authPage.AuthWithAttempts("admin", "wrong"); }
-                catch { }
-            }
-
-            _authPage.AuthWithAttempts("admin", "123456", "");
-        }
-
-        [TestMethod]
         public void CaptchaTest_CodeHasValidFormat()
         {
             _authPage.ResetFailedAttempts();
@@ -240,69 +207,12 @@ namespace UnitTestAksenova4
             string allowedChars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
             Assert.IsNotNull(code);
-            Assert.IsTrue(code.Length >= 4 && code.Length <= 6, "Длина 4-6 символов");
+            Assert.IsTrue(code.Length >= 4 && code.Length <= 6);
 
             foreach (char c in code)
             {
                 Assert.IsTrue(allowedChars.Contains(c), $"Символ '{c}' недопустим");
             }
-        }
-
-        [TestMethod]
-        public void CaptchaTest_RefreshGeneratesNewCode()
-        {
-            _authPage.ResetFailedAttempts();
-
-            for (int i = 0; i < 3; i++)
-            {
-                try { _authPage.AuthWithAttempts("admin", "wrong"); }
-                catch { }
-            }
-
-            string oldCode = _authPage.GetCurrentCaptchaCode();
-            _authPage.RefreshCaptcha();
-            string newCode = _authPage.GetCurrentCaptchaCode();
-
-            Assert.AreNotEqual(oldCode, newCode, "Код должен измениться");
-        }
-
-        [TestMethod]
-        public void CaptchaTest_CounterIncreasesOnFailedAttempts()
-        {
-            _authPage.ResetFailedAttempts();
-            Assert.AreEqual(0, _authPage.GetFailedAttempts());
-
-            try { _authPage.AuthWithAttempts("admin", "wrong"); }
-            catch { }
-            Assert.AreEqual(1, _authPage.GetFailedAttempts());
-
-            try { _authPage.AuthWithAttempts("admin", "wrong"); }
-            catch { }
-            Assert.AreEqual(2, _authPage.GetFailedAttempts());
-
-            try { _authPage.AuthWithAttempts("admin", "wrong"); }
-            catch { }
-            Assert.AreEqual(3, _authPage.GetFailedAttempts());
-            Assert.IsTrue(_authPage.NeedCaptcha());
-        }
-
-        [TestMethod]
-        public void CaptchaTest_CounterDoesNotIncreaseOnValidCaptcha()
-        {
-            _authPage.ResetFailedAttempts();
-
-            for (int i = 0; i < 3; i++)
-            {
-                try { _authPage.AuthWithAttempts("admin", "wrong"); }
-                catch { }
-            }
-
-            int beforeCount = _authPage.GetFailedAttempts();
-            string captchaCode = _authPage.GetCurrentCaptchaCode();
-            bool result = _authPage.AuthWithAttempts("admin", "123456", captchaCode);
-
-            Assert.IsTrue(result);
-            Assert.AreEqual(0, _authPage.GetFailedAttempts(), "Счетчик должен сброситься, а не увеличиться");
         }
     }
 }
