@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Media;
 using System.Windows;
+using Практическая_работа_4_Солодовников_Кураев.Pages;
 
 namespace Практическая_работа_4_Солодовников_Кураев
 {
@@ -80,6 +82,21 @@ namespace Практическая_работа_4_Солодовников_Ку�
                 MessageBox.Show($"Ошибка воспроизведения: {ex.Message}",
                     "Упс", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+        private void ButtonAuthPage_Click(object sender, RoutedEventArgs e)
+        {
+            MainFrame.Navigate(new AuthPage());
+        }
+        private Dictionary<string, string> GetUsersFromAuthPage()
+        {
+            var tempAuth = new AuthPage();
+            return tempAuth.GetUsers();
+        }
+
+        private void ButtonRegPage_Click(object sender, RoutedEventArgs e)
+        {
+            var users = GetUsersFromAuthPage();
+            MainFrame.Navigate(new RegPage(users));
         }
 
         protected override void OnClosing(CancelEventArgs e)

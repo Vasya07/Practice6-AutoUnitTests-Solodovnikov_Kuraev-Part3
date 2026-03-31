@@ -1,154 +1,308 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using Практическая_работа_4_Солодовников_Кураев;
+using System.Collections.Generic;
+using System.Linq;
+using Практическая_работа_4_Солодовников_Кураев.Pages;
 
 namespace UnitTestAksenova4
 {
     [TestClass]
-    public class UnitTest1
+    public class AuthTests
     {
-        private Page1 page1;
-        private Page2 page2;
-        private Page3 page3;
+        private AuthPage _authPage;
+        private RegPage _regPage;
+        private Dictionary<string, string> _testUsers;
 
         [TestInitialize]
         public void Setup()
         {
-            page1 = new Page1();
-            page2 = new Page2();
-            page3 = new Page3();
+            _testUsers = new Dictionary<string, string>
+            {
+                { "admin", "123456" },
+                { "user1", "pass1" }
+            };
+
+            _authPage = new AuthPage();
+            _regPage = new RegPage(_testUsers);
         }
 
         [TestMethod]
-        public void TestMethod1()
+        public void AuthTest_ValidCredentials_ReturnsTrue()
         {
-            int res = 2 * 2;
-            Assert.AreEqual(res, 4);
-            Assert.AreNotEqual(res, 5);
-            Assert.IsFalse(res > 4);
-            Assert.IsTrue(res < 5);
+            bool result = _authPage.Auth("admin", "123456");
+            Assert.IsTrue(result);
         }
 
         [TestMethod]
-        public void Page1_Calculate_ValidInput_ReturnsCorrectResult()
+        public void AuthTest_InvalidPassword_ReturnsFalse()
         {
-            double x = 2;
-            double y = 3;
-            double z = 1;
-            double expected = 537.37881428004;
-            double actual = page1.CalculateFunction(x, y, z);
-            Assert.AreEqual(expected, actual, 0.001, "Неверное значение функции");
+            bool result = _authPage.Auth("admin", "wrongpassword");
+            Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public void Page1_Calculate_ZeroY_ThrowsDivideByZero()
+        public void AuthTest_NonExistentUser_ReturnsFalse()
         {
-            double x = 2;
-            double y = 0;
-            double z = 1;
-            Assert.ThrowsException<DivideByZeroException>(() => 
-                page1.CalculateFunction(x, y, z), "Должно быть исключение при y=0");
+            bool result = _authPage.Auth("nonexistent", "123456");
+            Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public void Page1_Calculate_NegativeY_WorksCorrectly()
+        [ExpectedException(typeof(ArgumentException))]
+        public void AuthTest_EmptyLogin_ThrowsException()
         {
-            double x = 2;
-            double y = -2;
-            double z = 1;
-            double actual = page1.CalculateFunction(x, y, z);
-            Assert.IsFalse(double.IsNaN(actual), "Результат не должен быть NaN");
-            Assert.IsFalse(double.IsInfinity(actual), "Результат не должен быть бесконечностью");
+            _authPage.Auth("", "123456");
         }
 
         [TestMethod]
-        public void Page2_CalculateFX_Sinh_ReturnsCorrectValue()
+        [ExpectedException(typeof(ArgumentException))]
+        public void AuthTest_EmptyPassword_ThrowsException()
         {
-            double x = 1;
-            double expected = Math.Sinh(1);
-            double actual = page2.CalculateFX(x, Page2.FunctionType.Sinh);
-            Assert.AreEqual(expected, actual, 0.001, "Неверное значение sh(x)");
+            _authPage.Auth("admin", "");
         }
 
         [TestMethod]
-        public void Page2_CalculateFX_Square_ReturnsCorrectValue()
+        public void AuthTest_Success_AllValidUsers()
         {
-            double x = 3;
-            double expected = 9;
-            double actual = page2.CalculateFX(x, Page2.FunctionType.Square);
-            Assert.AreEqual(expected, actual, 0.001, "Неверное значение x^2");
+            var validUsers = new Dictionary<string, string>
+            {
+                { "admin", "123456" },
+                { "user1", "pass1" }
+            };
+
+            foreach (var user in validUsers)
+            {
+                Assert.IsTrue(_authPage.Auth(user.Key, user.Value));
+            }
         }
 
         [TestMethod]
-        public void Page2_CalculateFX_Exp_ReturnsCorrectValue()
+        public void AuthTest_Fail_InvalidCredentials()
         {
-            double x = 2;
-            double expected = Math.Exp(2);
-            double actual = page2.CalculateFX(x, Page2.FunctionType.Exp);
-            Assert.AreEqual(expected, actual, 0.001, "Неверное значение e^x");
+            var invalidCredentials = new[]
+            {
+                new { Login = "admin", Password = "wrong" },
+                new { Login = "user1", Password = "wrongpass" },
+                new { Login = "nonexistent", Password = "123" }
+            };
+
+            foreach (var cred in invalidCredentials)
+            {
+                Assert.IsFalse(_authPage.Auth(cred.Login, cred.Password));
+            }
         }
 
         [TestMethod]
-        public void Page2_CalculateFunction_XequalsZero_ReturnsCorrectResult()
+        public void RegisterTest_ValidData_ReturnsTrue()
         {
-            double x = 0;
-            double y = 2;
-            var funcType = Page2.FunctionType.Square;
-            double expected = Math.Pow(0 * 0 + 2, 3);
-            double actual = page2.CalculateFunction(x, y, funcType);
-            Assert.AreEqual(expected, actual, 0.001, "Неверное значение при x=0");
+            bool result = _regPage.Register("newuser", "password123", "password123");
+            Assert.IsTrue(result);
         }
 
         [TestMethod]
-        public void Page2_CalculateFunction_YequalsZero_ReturnsZero()
+        [ExpectedException(typeof(ArgumentException))]
+        public void RegisterTest_EmptyLogin_ThrowsException()
         {
-            double x = 2;
-            double y = 0;
-            var funcType = Page2.FunctionType.Square;
-            double actual = page2.CalculateFunction(x, y, funcType);
-            Assert.AreEqual(0, actual, 0.001, "При y=0 результат должен быть 0");
+            _regPage.Register("", "pass123", "pass123");
         }
 
         [TestMethod]
-        public void Page3_CalculateFunction_ValidInput_ReturnsCorrectResult()
+        [ExpectedException(typeof(ArgumentException))]
+        public void RegisterTest_EmptyPassword_ThrowsException()
         {
-            double x = 1;
-            double b = 2;
-            double expected = 9 * (1 + 8) * Math.Tan(1);
-            double actual = page3.CalculateFunction(x, b);
-            Assert.AreEqual(expected, actual, 0.001, "Неверное значение функции");
+            _regPage.Register("newuser", "", "");
         }
 
         [TestMethod]
-        public void Page3_CalculateFunction_CosEqualsZero_ThrowsDivideByZero()
+        [ExpectedException(typeof(ArgumentException))]
+        public void RegisterTest_PasswordTooShort_ThrowsException()
         {
-            double x = Math.PI / 2;
-            double b = 1;
-            Assert.ThrowsException<DivideByZeroException>(() => 
-                page3.CalculateFunction(x, b), "Должно быть исключение при cos(x)=0");
+            _regPage.Register("newuser", "123", "123");
         }
 
         [TestMethod]
-        public void Page3_TabulateFunction_ValidInput_ReturnsPoints()
+        [ExpectedException(typeof(ArgumentException))]
+        public void RegisterTest_PasswordsDoNotMatch_ThrowsException()
         {
-            double x0 = 0;
-            double xk = 2;
-            double dx = 0.5;
-            double b = 1;
-            var result = page3.TabulateFunction(x0, xk, dx, b);
-            Assert.IsTrue(result.Points.Count > 0, "Должны быть точки");
-            Assert.IsFalse(string.IsNullOrEmpty(result.TextOutput), "Должен быть текстовый вывод");
+            _regPage.Register("newuser", "password123", "different123");
         }
 
         [TestMethod]
-        public void Page3_TabulateFunction_InvalidStep_ThrowsException()
+        [ExpectedException(typeof(ArgumentException))]
+        public void RegisterTest_UserAlreadyExists_ThrowsException()
         {
-            double x0 = 0;
-            double xk = 2;
-            double dx = -0.5;
-            double b = 1;
-            Assert.ThrowsException<ArgumentException>(() => 
-                page3.TabulateFunction(x0, xk, dx, b), "Отрицательный шаг недопустим");
+            _regPage.Register("admin", "123456", "123456");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void RegisterTest_InvalidLoginCharacters_ThrowsException()
+        {
+            _regPage.Register("user name!", "password123", "password123");
+        }
+
+        [TestMethod]
+        public void CaptchaTest_ActivatesAfterThreeFailedAttempts()
+        {
+            _authPage.ResetFailedAttempts();
+
+            for (int i = 0; i < 2; i++)
+            {
+                try { _authPage.AuthWithAttempts("admin", "wrong"); }
+                catch { }
+                Assert.IsFalse(_authPage.NeedCaptcha(), $"После {i + 1} попытки CAPTCHA не требуется");
+            }
+
+            try { _authPage.AuthWithAttempts("admin", "wrong"); }
+            catch { }
+            Assert.IsTrue(_authPage.NeedCaptcha(), "После 3 неудачных попыток CAPTCHA требуется");
+            Assert.AreEqual(3, _authPage.GetFailedAttempts(), "Счетчик должен показывать 3");
+        }
+
+        [TestMethod]
+        public void CaptchaTest_ResetsAfterSuccessfulLogin()
+        {
+            _authPage.ResetFailedAttempts();
+
+            for (int i = 0; i < 3; i++)
+            {
+                try { _authPage.AuthWithAttempts("admin", "wrong"); }
+                catch { }
+            }
+            Assert.IsTrue(_authPage.NeedCaptcha(), "CAPTCHA активна");
+
+            string captchaCode = _authPage.GetCurrentCaptchaCode();
+            bool result = _authPage.AuthWithAttempts("admin", "123456", captchaCode);
+
+            Assert.IsTrue(result, "Успешный вход");
+            Assert.IsFalse(_authPage.NeedCaptcha(), "CAPTCHA не требуется");
+            Assert.AreEqual(0, _authPage.GetFailedAttempts(), "Счетчик сброшен");
+        }
+
+        [TestMethod]
+        public void CaptchaTest_ValidCaptchaAllowsLogin()
+        {
+            _authPage.ResetFailedAttempts();
+            for (int i = 0; i < 3; i++)
+            {
+                try { _authPage.AuthWithAttempts("admin", "wrong"); }
+                catch { }
+            }
+
+            string captchaCode = _authPage.GetCurrentCaptchaCode();
+            bool result = _authPage.AuthWithAttempts("admin", "123456", captchaCode);
+
+            Assert.IsTrue(result, "Правильный CAPTCHA должен пропускать");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void CaptchaTest_InvalidCaptchaThrowsException()
+        {
+            _authPage.ResetFailedAttempts();
+
+            for (int i = 0; i < 3; i++)
+            {
+                try { _authPage.AuthWithAttempts("admin", "wrong"); }
+                catch { }
+            }
+
+            _authPage.AuthWithAttempts("admin", "123456", "WRONG_CODE");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void CaptchaTest_EmptyCaptchaThrowsException()
+        {
+            _authPage.ResetFailedAttempts();
+
+            for (int i = 0; i < 3; i++)
+            {
+                try { _authPage.AuthWithAttempts("admin", "wrong"); }
+                catch { }
+            }
+
+            _authPage.AuthWithAttempts("admin", "123456", "");
+        }
+
+        [TestMethod]
+        public void CaptchaTest_CodeHasValidFormat()
+        {
+            _authPage.ResetFailedAttempts();
+
+            for (int i = 0; i < 3; i++)
+            {
+                try { _authPage.AuthWithAttempts("admin", "wrong"); }
+                catch { }
+            }
+
+            string code = _authPage.GetCurrentCaptchaCode();
+            string allowedChars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+            Assert.IsNotNull(code);
+            Assert.IsTrue(code.Length >= 4 && code.Length <= 6, "Длина 4-6 символов");
+
+            foreach (char c in code)
+            {
+                Assert.IsTrue(allowedChars.Contains(c), $"Символ '{c}' недопустим");
+            }
+        }
+
+        [TestMethod]
+        public void CaptchaTest_RefreshGeneratesNewCode()
+        {
+            _authPage.ResetFailedAttempts();
+
+            for (int i = 0; i < 3; i++)
+            {
+                try { _authPage.AuthWithAttempts("admin", "wrong"); }
+                catch { }
+            }
+
+            string oldCode = _authPage.GetCurrentCaptchaCode();
+            _authPage.RefreshCaptcha();
+            string newCode = _authPage.GetCurrentCaptchaCode();
+
+            Assert.AreNotEqual(oldCode, newCode, "Код должен измениться");
+        }
+
+        [TestMethod]
+        public void CaptchaTest_CounterIncreasesOnFailedAttempts()
+        {
+            _authPage.ResetFailedAttempts();
+            Assert.AreEqual(0, _authPage.GetFailedAttempts());
+
+            try { _authPage.AuthWithAttempts("admin", "wrong"); }
+            catch { }
+            Assert.AreEqual(1, _authPage.GetFailedAttempts());
+
+            try { _authPage.AuthWithAttempts("admin", "wrong"); }
+            catch { }
+            Assert.AreEqual(2, _authPage.GetFailedAttempts());
+
+            try { _authPage.AuthWithAttempts("admin", "wrong"); }
+            catch { }
+            Assert.AreEqual(3, _authPage.GetFailedAttempts());
+            Assert.IsTrue(_authPage.NeedCaptcha());
+        }
+
+        [TestMethod]
+        public void CaptchaTest_CounterDoesNotIncreaseOnValidCaptcha()
+        {
+            _authPage.ResetFailedAttempts();
+
+            for (int i = 0; i < 3; i++)
+            {
+                try { _authPage.AuthWithAttempts("admin", "wrong"); }
+                catch { }
+            }
+
+            int beforeCount = _authPage.GetFailedAttempts();
+            string captchaCode = _authPage.GetCurrentCaptchaCode();
+            bool result = _authPage.AuthWithAttempts("admin", "123456", captchaCode);
+
+            Assert.IsTrue(result);
+            Assert.AreEqual(0, _authPage.GetFailedAttempts(), "Счетчик должен сброситься, а не увеличиться");
         }
     }
 }

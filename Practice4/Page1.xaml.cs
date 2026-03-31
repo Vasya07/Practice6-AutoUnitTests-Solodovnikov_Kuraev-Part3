@@ -3,7 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 
 namespace Практическая_работа_4_Солодовников_Кураев
-{
+{   
     public partial class Page1 : Page
     {
         public Page1()
