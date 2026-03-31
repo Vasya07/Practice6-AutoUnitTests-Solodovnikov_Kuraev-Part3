@@ -85,7 +85,8 @@ PrgModulesWPF4
 ## Результаты тестирования
 
 ### Обозреватель тестов
-<img width="1376" height="624" alt=""Сори, фотка осталась за бортом :(" src="https://github.com/user-attachments/assets/a534d909-466a-45e8-be5d-4a01f8f98aa0" />
+<img width="1376" height="624" alt="Сори, фотка осталась за бортом :(" src="https://github.com/user-attachments/assets/76c88ecd-7d0c-4f9f-a935-4f08107b7186" />
+
 ### Таблица пользователей в БД
 <img width="595" height="76" alt="Сори, фотка осталась за бортом :(" src="https://github.com/user-attachments/assets/40da6a00-ae99-4e5c-a6d5-8861c5143aff" />
 
