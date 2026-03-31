@@ -85,7 +85,8 @@ PrgModulesWPF4
 ## Результаты тестирования
 
 ### Обозреватель тестов
-![Test Explorer](screenshots/test-explorer.png)
+<img width="1376" height="624" alt=""Сори, фотка осталась за бортом :(" src="https://github.com/user-attachments/assets/a534d909-466a-45e8-be5d-4a01f8f98aa0" />
+
 
 ### Таблица пользователей в БД
 ![Users Table](screenshots/users-table.png)
@@ -154,32 +155,25 @@ git clone https://github.com/Vasya07/Practice6-AutoUnitTests-Solodovnikov_Kuraev
 
 ## SQL-скрипт базы данных
 ```sql
-CREATE DATABASE UserAuthDB;
-GO
+CREATE DATABASE Practice6Part3;
 
-USE UserAuthDB;
-GO
+USE Practice6Part3;
 
 CREATE TABLE Users (
     Id INT IDENTITY(1,1) PRIMARY KEY,
     Login NVARCHAR(50) NOT NULL UNIQUE,
-    PasswordHash NVARCHAR(255) NOT NULL,
+    PasswordHash NVARCHAR(255) NOT NULL,    
     Email NVARCHAR(100),
     FullName NVARCHAR(100),
     IsActive BIT DEFAULT 1,
     CreatedAt DATETIME DEFAULT GETDATE()
 );
-GO
 
 INSERT INTO Users (Login, PasswordHash, Email, FullName)
 VALUES 
     ('admin', '123456', 'admin@example.com', 'Администратор'),
     ('user1', 'pass1', 'user1@example.com', 'Пользователь 1'),
     ('ivanov', 'qwerty', 'ivanov@example.com', 'Иван Иванов');
-GO
-
-SELECT * FROM Users;
-GO
 ```
 ## Ссылка на программное решение
 ```
